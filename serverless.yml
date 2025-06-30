@@ -1,0 +1,43 @@
+service: gofastapi-node
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  memorySize: 4096
+  timeout: 29
+  region: ap-south-2
+  stage: prod
+  apiGateway:
+    shouldStartNameWithService: true
+    binaryMediaTypes:
+      - '*/*'
+
+plugins:
+  - serverless-domain-manager
+  - serverless-scriptable-plugin
+  - serverless-dotenv-plugin
+
+functions:
+  app:
+    handler: gofastapi_entry.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+
+custom:
+  customDomain:
+    domainName: gofastapi.com
+    certificateName: "*.gofastapi.com"
+    basePath: ""
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+    endpointType: regional
+
+package:
+  patterns:
+    - '!node_modules/**'
+    - '!**/.env/**'
+    - '!**/__tests__/**'
+    - '!*.zip'
